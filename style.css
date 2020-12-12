@@ -1,0 +1,38 @@
+td{
+    text-align: center;
+}
+
+input{
+    width: 90%;
+    text-align: center;
+}
+
+#numprocesos{
+    width: auto;
+    text-align: center;
+}
+
+#btnSimular{
+    background-color: rgb(255, 255, 255);
+    align-self: center;
+    width: 110px; /* Para que no se rompa en dos líneas, y lo translade tal cual. */
+    margin-top: 1%;
+    margin-left: 50%;
+    transform: translateX(-50%);
+}
+
+#btnProcesos{
+    background-color: rgb(255, 255, 255);
+    align-self: center;
+    width: 110px; /* Para que no se rompa en dos líneas, y lo translade tal cual. */
+    margin-top: 1%;
+    margin-left: 50%;
+    transform: translateX(-50%);
+}
+
+table{
+    align-self: center;
+    border: 1px;
+}
+
+
