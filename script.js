@@ -78,12 +78,9 @@ function simular(){
             }
         }
         for(i=0;i<filas;i++){
-            //console.log("\t\tReloj proceso "+prioridad[i].id+": "+prioridad[i].relojEstado)
+            var terminado=false
+            console.log("\t\tReloj proceso "+prioridad[i].id+": "+prioridad[i].relojEstado)
             //console.log("\t\tBloqueo pasado "+prioridad[i].id+": "+prioridad[i].bloqueoPasado)
-            if(prioridad[i].estado==1 && prioridad[i].bloqueoPasado && prioridad[i].relojEstado==prioridad[i].duracion-prioridad[i].inBloqueo){
-                prioridad[i].estado=0
-                cpuOcupada=false
-            }
             if(prioridad[i].estado==3 && prioridad[i].relojEstado==prioridad[i].durBloqueo){
                 if(cpuOcupada){
                     prioridad[i].estado=2
@@ -95,20 +92,44 @@ function simular(){
                 }
                 prioridad[i].bloqueoPasado=true
             }
-            if(prioridad[i].estado==1 && prioridad[i].relojEstado==prioridad[i].inBloqueo){
+            if(prioridad[i].estado==1 && prioridad[i].bloqueoPasado && prioridad[i].relojEstado==prioridad[i].duracion-prioridad[i].inBloqueo){
+                prioridad[i].estado=0
+                cpuOcupada=false
+                for(j=0;j<filas;j++){
+                    if(prioridad[j].estado==2){
+                        prioridad[j].estado=1
+                        prioridad[j].relojEstado=1
+                        cpuOcupada=true
+                        terminado=true
+                        break
+                    }
+                }
+            }
+            if(terminado){
+                for(j=i;j<filas;j++){
+                    prioridad[j].relojEstado++
+                }
+                break
+            }
+            if(prioridad[i].estado==1 && prioridad[i].relojEstado==prioridad[i].inBloqueo && !prioridad[i].bloqueoPasado){
                 prioridad[i].estado=3
                 prioridad[i].relojEstado=0
                 cpuOcupada=false
                 for(j=0;j<filas;j++){
                     if(prioridad[j].estado==2){
                         prioridad[j].estado=1
-                        prioridad[j].relojEstado=0
-                        cpuOcupada=true;
+                        prioridad[j].relojEstado=1
+                        cpuOcupada=true
+                        terminado = true
                         break
                     }
                 }
             }
             prioridad[i].relojEstado++
+            console.log("terminado: "+terminado)
+            if(terminado){
+                break
+            }
         }
         for(i=0;i<filas;i++){
             console.log("\t"+prioridad[i].id+": "+prioridad[i].estado)
@@ -125,8 +146,9 @@ function procesos(aux){
     this.inBloqueo = aux[3]
     this.durBloqueo = aux[4]
     this.estado = 0
-    var relojEstado
+    this.relojEstado=0
     this.bloqueoPasado = false
+    this.boolBloqueo=false
 
     /* 
         Cuando está en 0, el estado del proceso es no iniciado o terminado
