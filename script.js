@@ -1,3 +1,5 @@
+const { BigIntStats } = require("fs");
+
 function crear(){
     var filas = document.getElementById("numprocesos").value
     var table ="<table align=\"center\" border=\"1\" id=\"datos1\">";
@@ -55,10 +57,53 @@ function simular(){
         }
         listaProcesos[i] = new procesos(aux)
     }
+    
+    var FCFS = FCFS()
+    var SJF = SJF()
+    var SRTF = SRTF()
 
-    FCFS()
-    SJF()
-    SRTF()
+    var enEjecucion = new Boolean(true)
+    var instante = 0
+
+    while(enEjecucion){
+        var ocupado = new Boolean(false)
+
+        for(i=0; i<filas; i++){
+            if(FCFS[i].estado == 1 && !ocupado){
+                ocupado = true
+            }
+            if(FCFS[i].insLlegada == instante){
+                FCFS[i].estado = 2
+            }
+            if(instante == FCFS[i].tiempoEjecucion){
+                FCFS[i].estado = 3
+                ocupado = false
+            }
+            if(instante - FCFS[i].tiempoEjecucion == FCFS[i].durBloqueo){
+                if(ocupado){
+                    FCFS[i].estado = 2
+                } else {
+                    FCFS[i].estado = 1
+                    ocupado = true
+                    FCFS[i].tiempoFinal = instante + FCFS[i].duracion
+                }
+            }
+            if(FCFS[i].tiempoFinal = instante + FCFS[i].duracion - FCFS[i].inBloqueo){
+                FCFS[i].estado = 0
+                ocupado = false
+            }
+        }
+
+        for(i=0; i<filas && !ocupado; i++){
+            if(FCFS[i].insLlegada <= instante && FCFS[i].estado != 3 && FCFS[i].estado != 0){
+                FCFS[i].estado = 1
+                FCFS[i].tiempoEjecucion = FCFS[i].inBloqueo + instante
+                break
+            }
+        }
+
+        instante++
+    }
 
 }
 
@@ -68,7 +113,16 @@ function procesos(aux){
     this.duracion = aux[2]
     this.inBloqueo = aux[3]
     this.durBloqueo = aux[4]
-    var estado
+    var tiempoEjecucion = 99
+    var tiempoFinal = 99
+    var estado = 0
+
+    /* 
+        Cuando está en 0, el estado del proceso es no iniciado o terminado
+        Cuando está en 1, el estado del proceso es activo
+        Cuando está en 2, el estado del proceso es en espera
+        Cuando está en 3, el estado del proceso es bloqueado
+    */
 }
    
 function FCFS(){
@@ -89,6 +143,8 @@ function FCFS(){
             }
         }
     }
+
+    return prioridad
 }
 
 function SJF(){
@@ -109,6 +165,8 @@ function SJF(){
             }
         }
     }
+
+    return prioridad
 }
 
 function SRTF(){
@@ -132,5 +190,5 @@ function SRTF(){
         }
     }
 
-    console.log(prioridad)
+    return prioridad
 }
