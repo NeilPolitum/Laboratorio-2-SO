@@ -1,5 +1,3 @@
-const { BigIntStats } = require("fs");
-
 function crear(){
     var filas = document.getElementById("numprocesos").value
     var table ="<table align=\"center\" border=\"1\" id=\"datos1\">";
@@ -58,51 +56,64 @@ function simular(){
         listaProcesos[i] = new procesos(aux)
     }
     
-    var FCFS = FCFS()
-    var SJF = SJF()
-    var SRTF = SRTF()
-
-    var enEjecucion = new Boolean(true)
-    var instante = 0
-
-    while(enEjecucion){
-        var ocupado = new Boolean(false)
-
-        for(i=0; i<filas; i++){
-            if(FCFS[i].estado == 1 && !ocupado){
-                ocupado = true
+    var prioridad = FCFS()
+    var cpuOcupada=new Boolean(false)
+    for(instante=0;instante<12;instante++){
+        console.log("Instante: "+instante+":")
+        for(i=0;i<filas;i++){
+            if(prioridad[i].insLlegada==instante){
+                //Pone en espera cada proceso que va llegando según su prioridad y lo pone en espera
+                prioridad[i].estado=2
             }
-            if(FCFS[i].insLlegada == instante){
-                FCFS[i].estado = 2
-            }
-            if(instante == FCFS[i].tiempoEjecucion){
-                FCFS[i].estado = 3
-                ocupado = false
-            }
-            if(instante - FCFS[i].tiempoEjecucion == FCFS[i].durBloqueo){
-                if(ocupado){
-                    FCFS[i].estado = 2
-                } else {
-                    FCFS[i].estado = 1
-                    ocupado = true
-                    FCFS[i].tiempoFinal = instante + FCFS[i].duracion
+        }
+        if(cpuOcupada==false){
+            console.log("CPU desocupada")
+            for(i=0;i<filas;i++){
+                if(prioridad[i].estado==2){
+                    prioridad[i].estado=1
+                    prioridad[i].relojEstado=0
+                    cpuOcupada=true;
+                    break
                 }
             }
-            if(FCFS[i].tiempoFinal = instante + FCFS[i].duracion - FCFS[i].inBloqueo){
-                FCFS[i].estado = 0
-                ocupado = false
-            }
         }
-
-        for(i=0; i<filas && !ocupado; i++){
-            if(FCFS[i].insLlegada <= instante && FCFS[i].estado != 3 && FCFS[i].estado != 0){
-                FCFS[i].estado = 1
-                FCFS[i].tiempoEjecucion = FCFS[i].inBloqueo + instante
-                break
+        for(i=0;i<filas;i++){
+            //console.log("\t\tReloj proceso "+prioridad[i].id+": "+prioridad[i].relojEstado)
+            //console.log("\t\tBloqueo pasado "+prioridad[i].id+": "+prioridad[i].bloqueoPasado)
+            if(prioridad[i].estado==1 && prioridad[i].bloqueoPasado && prioridad[i].relojEstado==prioridad[i].duracion-prioridad[i].inBloqueo){
+                prioridad[i].estado=0
+                cpuOcupada=false
             }
+            if(prioridad[i].estado==3 && prioridad[i].relojEstado==prioridad[i].durBloqueo){
+                if(cpuOcupada){
+                    prioridad[i].estado=2
+                }
+                else{
+                    prioridad[i].estado=1
+                    prioridad[i].relojEstado=0
+                    cpuOcupada=true
+                }
+                prioridad[i].bloqueoPasado=true
+            }
+            if(prioridad[i].estado==1 && prioridad[i].relojEstado==prioridad[i].inBloqueo){
+                prioridad[i].estado=3
+                prioridad[i].relojEstado=0
+                cpuOcupada=false
+                for(j=0;j<filas;j++){
+                    if(prioridad[j].estado==2){
+                        prioridad[j].estado=1
+                        prioridad[j].relojEstado=0
+                        cpuOcupada=true;
+                        break
+                    }
+                }
+            }
+            prioridad[i].relojEstado++
         }
-
-        instante++
+        for(i=0;i<filas;i++){
+            console.log("\t"+prioridad[i].id+": "+prioridad[i].estado)
+            console.log("\t\tReloj: "+prioridad[i].relojEstado)
+        }
     }
 
 }
@@ -113,9 +124,9 @@ function procesos(aux){
     this.duracion = aux[2]
     this.inBloqueo = aux[3]
     this.durBloqueo = aux[4]
-    var tiempoEjecucion = 99
-    var tiempoFinal = 99
-    var estado = 0
+    this.estado = 0
+    var relojEstado
+    this.bloqueoPasado = false
 
     /* 
         Cuando está en 0, el estado del proceso es no iniciado o terminado
