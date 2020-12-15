@@ -58,7 +58,7 @@ function simular(){
     
     var prioridad = FCFS()
     var cpuOcupada=new Boolean(false)
-    for(instante=0;instante<12;instante++){
+    for(instante=0;instante<16;instante++){
         console.log("Instante: "+instante+":")
         for(i=0;i<filas;i++){
             if(prioridad[i].insLlegada==instante){
@@ -80,7 +80,6 @@ function simular(){
         for(i=0;i<filas;i++){
             var terminado=false
             console.log("\t\tReloj proceso "+prioridad[i].id+": "+prioridad[i].relojEstado)
-            //console.log("\t\tBloqueo pasado "+prioridad[i].id+": "+prioridad[i].bloqueoPasado)
             if(prioridad[i].estado==3 && prioridad[i].relojEstado==prioridad[i].durBloqueo){
                 if(cpuOcupada){
                     prioridad[i].estado=2
@@ -95,15 +94,16 @@ function simular(){
             if(prioridad[i].estado==1 && prioridad[i].bloqueoPasado && prioridad[i].relojEstado==prioridad[i].duracion-prioridad[i].inBloqueo){
                 prioridad[i].estado=0
                 cpuOcupada=false
+                /*
                 for(j=0;j<filas;j++){
-                    if(prioridad[j].estado==2){
+                    if(prioridad[j].estado==2){  ////!!!!ESTA MAL
                         prioridad[j].estado=1
                         prioridad[j].relojEstado=1
                         cpuOcupada=true
                         terminado=true
                         break
                     }
-                }
+                }*/
             }
             if(terminado){
                 for(j=i;j<filas;j++){
@@ -124,6 +124,12 @@ function simular(){
                         break
                     }
                 }
+            }
+            //AGREGADO
+            if(prioridad[i].estado==2 && !cpuOcupada && prioridad[i].bloqueoPasado){
+                prioridad[i].estado = 1
+                cpuOcupada = true
+                prioridad[i].relojEstado = 0
             }
             prioridad[i].relojEstado++
             console.log("terminado: "+terminado)
@@ -148,7 +154,6 @@ function procesos(aux){
     this.estado = 0
     this.relojEstado=0
     this.bloqueoPasado = false
-    this.boolBloqueo=false
 
     /* 
         Cuando está en 0, el estado del proceso es no iniciado o terminado
